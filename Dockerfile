@@ -1,17 +1,20 @@
-FROM registry.access.redhat.com/ubi8/nodejs-10
+FROM registry.access.redhat.com/ubi8/nodejs-10:1 AS builder
 
-RUN mkdir app
+WORKDIR /opt/app-root
 
-# Install npm production packages
-COPY --chown=default:root . ./app
+COPY --chown=default:root . .
 
-ENV NODE_ENV production
-ENV PORT 3000
+RUN npm install
+RUN npm run build --if-present
+
+FROM registry.access.redhat.com/ubi8/nodejs-10:1
+
+COPY --chown=default:root . .
+COPY --from=builder /opt/app-root/dist dist
+RUN npm install --production
+
+ENV HOST=0.0.0.0 PORT=3000
 
 EXPOSE 3000/tcp
 
-WORKDIR ./app
-
-RUN npm install --production
-
-CMD ["npm", "start"]
+CMD npm run serve
