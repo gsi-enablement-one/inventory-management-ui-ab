@@ -4,7 +4,7 @@ WORKDIR /opt/app-root
 
 COPY --chown=default:root . .
 
-RUN npm install
+RUN npm install --production
 RUN npm run build --if-present
 
 FROM registry.access.redhat.com/ubi8/nodejs-10:1
